@@ -1,4 +1,4 @@
-/* V5.0 PROFESSIONAL DARK - PALETA SÓBRIA */
+/* V5.1.0 PROFESSIONAL DARK - PALETA SÓBRIA */
 :root {
     --bg: #121212; --card: #1E1E1E; --text: #E0E0E0; --border: #3A3A3A; 
     --accent: #6B7280; 
@@ -44,10 +44,10 @@ body.light-mode {
 
 /* === BLOQUEIO DE SELEÇÃO E CÓPIA === */
 body {
-  -webkit-user-select: none;  /* Safari, Chrome, Opera */
-  -moz-user-select: none;     /* Firefox */
-  -ms-user-select: none;      /* Internet Explorer/Edge */
-  user-select: none;           /* Padrão */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 input, textarea {
@@ -68,7 +68,7 @@ body {
 body::before {
     content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background-image: url('fundo-pizza.jpg'); background-size: cover; background-position: center;
-    opacity: 0.6; 
+    opacity: 0.3; /* ALTERADO: de 0.6 para 0.3 */
     z-index: -1; pointer-events: none;
 }
 
@@ -108,20 +108,41 @@ button:active, .btn-nav:active, input[type="checkbox"]:active, .btn-theme:active
     transform: scale(0.96); box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
+/* ===== LUPA (ASSISTIVE TOUCH) ===== */
 #assistive-touch {
-    position: fixed; bottom: 120px; right: 15px; 
-    width: 54px; height: 54px; background-color: rgba(40, 40, 40, 0.98); 
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    border: 1px solid var(--border); 
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4); 
-    z-index: 200; opacity: 0.9; transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-    cursor: pointer; color: #E0E0E0;
+    position: fixed;
+    width: 70px; /* AUMENTADO: 54px → 70px */
+    height: 70px;
+    background-color: rgba(40, 40, 40, 0.98); 
+    border-radius: 50%; 
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid white; /* ADICIONADO: contorno branco */
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    z-index: 200; 
+    opacity: 0.9; 
+    transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.2s;
+    cursor: pointer; 
+    color: #E0E0E0;
+    touch-action: none; /* ADICIONADO: evita rolagem durante o arrasto */
 }
+
 body.light-mode #assistive-touch { 
-    background-color: rgba(255, 255, 255, 0.98); color: #333; border: 1px solid #D1D5DB;
+    background-color: rgba(255, 255, 255, 0.98); 
+    color: #333; 
+    border: 2px solid #333; /* Contorno escuro no modo claro */
 }
-#assistive-touch:active { opacity: 1; transform: scale(0.92); box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-#assistive-touch svg { width: 24px; height: 24px; stroke-width: 2.5; }
+
+#assistive-touch:active { 
+    opacity: 1; 
+    transform: scale(0.96);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.7); 
+}
+
+#assistive-touch svg { 
+    width: 32px; /* AUMENTADO: 24px → 32px */
+    height: 32px;
+    stroke-width: 2.5; 
+}
 
 #search-overlay {
     position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
