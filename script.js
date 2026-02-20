@@ -1,3 +1,4 @@
+// v5.1.0 - Adicionado: lupa arrastável, persistência de posição, destaque visual
 let audioCtx = null;
 let inputCalculadoraAtual = null;
 let expressaoCalc = "";
@@ -109,40 +110,147 @@ window.addEventListener('load', initSpeech);
 
 function toggleSearch(event) {
     if (event) event.stopPropagation(); darFeedback();
-    const overlay = document.getElementById('search-overlay'); const btn = document.getElementById('assistive-touch');
-    if (overlay.style.display === 'block') { overlay.style.display = 'none'; btn.style.opacity = '0.9'; } 
-    else { overlay.style.display = 'block'; overlay.style.top = (window.scrollY + 15) + 'px'; btn.style.opacity = '0'; document.getElementById('filtroBusca').focus(); }
+    const overlay = document.getElementById('search-overlay');
+    const btn = document.getElementById('assistive-touch');
+    if (overlay.style.display === 'block') {
+        overlay.style.display = 'none';
+        // btn.style.opacity = '0.9';  // REMOVIDO: não altera opacidade
+    } else {
+        overlay.style.display = 'block';
+        overlay.style.top = (window.scrollY + 15) + 'px';
+        // btn.style.opacity = '0';    // REMOVIDO: não altera opacidade
+        document.getElementById('filtroBusca').focus();
+    }
 }
+
 document.addEventListener('click', function(event) { const overlay = document.getElementById('search-overlay'); const btn = document.getElementById('assistive-touch'); if ((!overlay.contains(event.target) && !btn.contains(event.target)) && overlay.style.display === 'block') { toggleSearch(null); } });
 window.addEventListener('scroll', function() { var overlay = document.getElementById('search-overlay'); if (overlay.style.display === 'block') { overlay.style.top = (window.scrollY + 15) + 'px'; } });
 
-// === NOVO: DOUBLE TAP NA LUPA ===
+// ===== DRAGGABLE LUPA COM PERSISTÊNCIA (EVENTOS DE TOQUE) =====
+let isDragging = false;
+let startX, startY, initialLeft, initialTop;
+const assistiveTouch = document.getElementById('assistive-touch');
+const storageKeyPos = 'lupaPosicao_v1';
+
+function carregarPosicaoLupa() {
+    const posSalva = localStorage.getItem(storageKeyPos);
+    if (posSalva) {
+        const pos = JSON.parse(posSalva);
+        assistiveTouch.style.left = pos.left;
+        assistiveTouch.style.top = pos.top;
+        assistiveTouch.style.bottom = 'auto';
+        assistiveTouch.style.right = 'auto';
+    } else {
+        // Posição padrão (caso nunca tenha sido arrastada)
+        assistiveTouch.style.bottom = '20px';
+        assistiveTouch.style.right = '15px';
+        assistiveTouch.style.top = 'auto';
+        assistiveTouch.style.left = 'auto';
+    }
+}
+
+assistiveTouch.addEventListener('touchstart', (e) => {
+    e.preventDefault(); // Impede comportamentos padrão (zoom, rolagem)
+    const touch = e.touches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+
+    // Obtém a posição atual da lupa (left/top ou bottom/right)
+    const computedStyle = window.getComputedStyle(assistiveTouch);
+    if (computedStyle.left !== 'auto' && computedStyle.left !== '0px') {
+        initialLeft = parseFloat(computedStyle.left);
+    } else {
+        // Se estiver posicionada com bottom/right, converte para left/top
+        const rect = assistiveTouch.getBoundingClientRect();
+        initialLeft = rect.left;
+    }
+    if (computedStyle.top !== 'auto' && computedStyle.top !== '0px') {
+        initialTop = parseFloat(computedStyle.top);
+    } else {
+        const rect = assistiveTouch.getBoundingClientRect();
+        initialTop = rect.top;
+    }
+
+    isDragging = false; // Só será considerado arrasto se houver movimento
+}, { passive: false });
+
+assistiveTouch.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // Crucial para evitar rolagem durante o arrasto
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+
+    if (!isDragging && (Math.abs(deltaX) > 5 || Math.abs(deltaY) > 5)) {
+        isDragging = true; // Inicia o arrasto apenas após um movimento mínimo
+    }
+
+    if (isDragging) {
+        // Calcula nova posição (em px, relativa à viewport)
+        let newLeft = initialLeft + deltaX;
+        let newTop = initialTop + deltaY;
+
+        // Limites: não ultrapassar as bordas da tela
+        const lupaWidth = assistiveTouch.offsetWidth;
+        const lupaHeight = assistiveTouch.offsetHeight;
+        const maxLeft = window.innerWidth - lupaWidth;
+        const maxTop = window.innerHeight - lupaHeight;
+
+        newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+        newTop = Math.max(0, Math.min(newTop, maxTop));
+
+        // Aplica posição
+        assistiveTouch.style.left = newLeft + 'px';
+        assistiveTouch.style.top = newTop + 'px';
+        assistiveTouch.style.bottom = 'auto';
+        assistiveTouch.style.right = 'auto';
+    }
+}, { passive: false });
+
+assistiveTouch.addEventListener('touchend', (e) => {
+    if (isDragging) {
+        e.preventDefault(); // Evita que o clique seja disparado após arrasto
+        // Salva a posição atual no localStorage
+        const pos = {
+            left: assistiveTouch.style.left,
+            top: assistiveTouch.style.top
+        };
+        localStorage.setItem(storageKeyPos, JSON.stringify(pos));
+    }
+    isDragging = false;
+}, { passive: false });
+
+// ===== DOUBLE TAP NA LUPA (COM PROTEÇÃO CONTRA ARRASTO) =====
 let lastTap = 0;
 let tapTimeout;
 let isTouchEvent = false;
-const btnLupa = document.getElementById('assistive-touch');
 
-btnLupa.addEventListener('touchstart', () => {
+assistiveTouch.addEventListener('touchstart', () => {
     isTouchEvent = true;
 });
 
-btnLupa.addEventListener('touchend', (e) => {
-    e.preventDefault(); // Impede o clique do mouse após toque
+assistiveTouch.addEventListener('touchend', (e) => {
+    // Se estava arrastando, não dispara o double tap
+    if (isDragging) {
+        e.preventDefault();
+        e.stopPropagation();
+        isTouchEvent = false;
+        return;
+    }
+
+    e.preventDefault();
     const currentTime = new Date().getTime();
     if (lastTap && (currentTime - lastTap) < 300) {
         // DOUBLE TAP
         clearTimeout(tapTimeout);
-        // Abre o overlay se estiver fechado
         if (document.getElementById('search-overlay').style.display !== 'block') {
             toggleSearch(null);
         }
-        // Pequeno atraso para garantir que o overlay seja aberto antes de ativar o microfone
         setTimeout(() => {
             toggleMic('busca', null);
         }, 50);
         lastTap = 0;
     } else {
-        // SINGLE TAP (aguarda para ver se vem segundo toque)
+        // SINGLE TAP
         tapTimeout = setTimeout(() => {
             toggleSearch(null);
         }, 300);
@@ -150,20 +258,17 @@ btnLupa.addEventListener('touchend', (e) => {
     lastTap = currentTime;
 });
 
-// Tratamento para mouse (clique simples)
-btnLupa.addEventListener('click', (e) => {
-    if (isTouchEvent) {
-        // Se veio de um toque, o evento já foi tratado no touchend
+assistiveTouch.addEventListener('click', (e) => {
+    if (isTouchEvent || isDragging) {
         e.preventDefault();
         e.stopPropagation();
         isTouchEvent = false;
         return;
     }
-    // Para clique com mouse, executa ação normal
     toggleSearch(e);
 });
-// ==================================
 
+// ===== SWIPE =====
 let swipeStartX = 0, swipeStartY = 0, swipeCurrentX = 0;
 let isSwiping = false, swipedRow = null, justSwiped = false;
 
@@ -228,7 +333,7 @@ function obterDataAtual() { return new Date().toLocaleDateString('pt-BR'); }
 function obterDataAmanha() { let hoje = new Date(); let amanha = new Date(hoje); amanha.setDate(hoje.getDate() + 1); return amanha.toLocaleDateString('pt-BR'); }
 
 function atualizarTitulos() { 
-    document.getElementById("titulo-pagina").innerHTML = `<span class="titulo-estoque" style="font-weight: 400; letter-spacing: 1px; color: #cccccc;">ESTOQUE</span> <span style="color: var(--btn-danger); font-weight: 900; margin-left: 4px;">V5.0</span>`; 
+    document.getElementById("titulo-pagina").innerHTML = `<span class="titulo-estoque" style="font-weight: 400; letter-spacing: 1px; color: #cccccc;">ESTOQUE</span> <span style="color: var(--btn-danger); font-weight: 900; margin-left: 4px;">V5.1</span>`; 
     document.getElementById("titulo-compras").innerText = "LISTA " + obterDataAmanha(); 
 }
 
@@ -237,7 +342,18 @@ var storageKey = "estoqueDados_v4_categorias"; var storageOcultos = "itensOculto
 var containerItens = document.getElementById("lista-itens-container"); var selectFiltro = document.getElementById("filtroSelect"); var buscaInput = document.getElementById("filtroBusca"); var areaCompras = document.getElementById("area-compras"); var ulCompras = document.getElementById("lista-compras-visual");
 
 function carregarListaPadrao() { var listaCombinada = []; var ocultosSistema = JSON.parse(localStorage.getItem(storageOcultos) || "[]"); produtosPadrao.forEach(p => { var d = p.split("|"); if (!ocultosSistema.includes(d[0].toLowerCase())) { listaCombinada.push({ n: d[0], q: "", u: d[1], c: false }); } }); var favoritosUsuario = JSON.parse(localStorage.getItem(storageMeus) || "[]"); favoritosUsuario.forEach(item => { if(!listaCombinada.some(i => i.n.toLowerCase() === item.n.toLowerCase())) { listaCombinada.push({ n: item.n, q: "", u: item.u, c: false }); } }); renderizarListaCompleta(listaCombinada); }
-function iniciarApp() { if(localStorage.getItem('temaEstoque') === 'claro') { document.body.classList.add('light-mode'); } atualizarTitulos(); var salvos = localStorage.getItem(storageKey); if (salvos && JSON.parse(salvos).length > 0) { renderizarListaCompleta(JSON.parse(salvos)); } else { carregarListaPadrao(); } atualizarDropdown(); atualizarPainelCompras(); initSwipe(); }
+
+function iniciarApp() { 
+    if(localStorage.getItem('temaEstoque') === 'claro') { document.body.classList.add('light-mode'); } 
+    atualizarTitulos(); 
+    carregarPosicaoLupa(); // Carrega posição salva da lupa
+    var salvos = localStorage.getItem(storageKey); 
+    if (salvos && JSON.parse(salvos).length > 0) { renderizarListaCompleta(JSON.parse(salvos)); } 
+    else { carregarListaPadrao(); } 
+    atualizarDropdown(); 
+    atualizarPainelCompras(); 
+    initSwipe(); 
+}
 
 function renderizarListaCompleta(dados) { containerItens.innerHTML = ""; dados.sort((a, b) => a.n.localeCompare(b.n)); let grupos = { 'carnes': [], 'laticinios': [], 'hortifruti': [], 'mercearia': [], 'temperos': [], 'limpeza': [], 'bebidas': [], 'embalagens': [], 'outros': [] }; dados.forEach(item => { let cat = identificarCategoria(item.n); grupos[cat].push(item); }); for (let cat in grupos) { if (grupos[cat].length > 0) { let trHeader = document.createElement("tr"); trHeader.classList.add("categoria-header-row"); trHeader.innerHTML = `<td colspan="4" class="categoria-header" style="background-color: ${coresCategorias[cat]}">${nomesCategorias[cat]}</td>`; containerItens.appendChild(trHeader); grupos[cat].forEach(item => { inserirLinhaNoDOM(item.n, item.q, item.u, item.c); }); } } }
 function inserirLinhaNoDOM(n, q, u, chk) { var tr = document.createElement("tr"); if(chk) tr.classList.add("linha-marcada"); tr.innerHTML = `<td class="col-check"><input type="checkbox" onchange="alternarCheck(this)" ${chk ? 'checked' : ''}></td><td class="col-desc"><span contenteditable="true" class="nome-prod" onblur="salvarEAtualizar()">${n}</span></td><td class="col-qtd"><input type="text" class="input-qtd-tabela" value="${q}" onclick="abrirCalculadora(this)" readonly></td><td class="col-unid"><select class="select-tabela" onchange="salvarDados()"><option value="kg" ${u==='kg'?'selected':''}>kg</option><option value="g" ${u==='g'?'selected':''}>g</option><option value="uni" ${u==='uni'?'selected':''}>uni</option><option value="pct" ${u==='pct'?'selected':''}>pct</option><option value="cx" ${u==='cx'?'selected':''}>cx</option><option value="bld" ${u==='bld'?'selected':''}>bld</option><option value="crt" ${u==='crt'?'selected':''}>crt</option></select></td>`; containerItens.appendChild(tr); }
