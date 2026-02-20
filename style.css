@@ -42,6 +42,21 @@ body.light-mode {
     --unified-cat-header: #475569; 
 }
 
+/* === BLOQUEIO DE SELEÇÃO E CÓPIA === */
+body {
+  -webkit-user-select: none;  /* Safari, Chrome, Opera */
+  -moz-user-select: none;     /* Firefox */
+  -ms-user-select: none;      /* Internet Explorer/Edge */
+  user-select: none;           /* Padrão */
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
 body { 
