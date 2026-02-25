@@ -3,174 +3,818 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estoque v5.1.0 (Professional Dark)</title>
-    
-    <link rel="icon" href="icone.png" type="image/png">
-    <link rel="apple-touch-icon" href="icone.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Estoque">
-
-    <link rel="stylesheet" href="style.css">
+    <title>StockFlow Pro (simplificado)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, 'Inter', sans-serif;
+        }
+        body {
+            background: #F5F5F7;
+            color: #1C1C1E;
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .theme-btn {
+            background: white;
+            border: 1px solid #E5E5EA;
+            border-radius: 30px;
+            width: 44px;
+            height: 44px;
+            font-size: 22px;
+            cursor: pointer;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            background: white;
+            padding: 6px;
+            border-radius: 40px;
+            border: 1px solid #E5E5EA;
+            margin-bottom: 24px;
+        }
+        .tab {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-radius: 32px;
+            padding: 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6C6C70;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: #007AFF;
+            color: white;
+        }
+        .tab-icon { font-size: 20px; }
+        .tab-label { font-size: 11px; text-transform: uppercase; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #E5E5EA;
+            padding: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6C6C70;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            display: block;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            background: #F2F2F7;
+            border: 1px solid #C6C6C8;
+            border-radius: 12px;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        button {
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 14px;
+            cursor: pointer;
+            background: white;
+            border: 1px solid #E5E5EA;
+            transition: all 0.2s;
+        }
+        button:active { transform: scale(0.96); }
+        .btn-primary { background: #007AFF; color: white; border: none; }
+        .btn-star { background: #FF9F0A; color: white; border: none; }
+        .btn-danger { background: #FF3B30; color: white; border: none; }
+        .btn-half { flex: 1; }
+        .action-group { display: flex; gap: 10px; margin-top: 10px; }
+        .table-wrapper {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #E5E5EA;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            background: #F2F2F7;
+            color: #6C6C70;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 16px 12px;
+            text-align: left;
+            border-bottom: 1px solid #E5E5EA;
+        }
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #E5E5EA;
+        }
+        .categoria-header {
+            background: #E5E5EA;
+            font-weight: 700;
+            padding: 12px;
+        }
+        .col-check { width: 40px; }
+        .col-qtd, .col-unid { width: 90px; }
+        .input-qtd-tabela {
+            background: #F2F2F7;
+            border: 1px solid #C6C6C8;
+            border-radius: 8px;
+            padding: 8px;
+            width: 100%;
+            text-align: center;
+            cursor: pointer;
+        }
+        .select-tabela {
+            background: #F2F2F7;
+            border: 1px solid #C6C6C8;
+            border-radius: 8px;
+            padding: 8px;
+            width: 100%;
+        }
+        .linha-marcada .nome-prod { text-decoration: line-through; color: #6C6C70; }
+        .share-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .actions-section { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+        .actions-section button { width: 100%; max-width: 400px; }
+        #area-compras {
+            background: #F2F2F7;
+            border: 1px solid #E5E5EA;
+            border-radius: 16px;
+            padding: 24px;
+        }
+        #lista-compras-visual li {
+            padding: 10px 0;
+            border-bottom: 1px solid #E5E5EA;
+            list-style: none;
+        }
+        #lista-compras-visual li::before {
+            content: "•";
+            color: #007AFF;
+            margin-right: 12px;
+        }
+        .nav-float {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .btn-nav {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid #E5E5EA;
+            font-size: 20px;
+        }
+    </style>
 </head>
 <body>
+    <div id="toast-container" style="position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; width: 90%; max-width: 400px; pointer-events: none;"></div>
 
-    <div id="toast-container"></div>
-    <div id="modal-confirm" class="modal-overlay" style="display:none;">
-        <div class="modal-box">
-            <div id="modal-text">Mensagem</div>
-            <div class="modal-buttons">
-                <button id="modal-btn-cancel" onclick="fecharModal(); darFeedback()">Cancelar</button>
-                <button id="modal-btn-confirm">Confirmar</button>
+    <!-- Cabeçalho -->
+    <div class="header">
+        <h1>StockFlow Pro <span id="versao" style="color: #FF3B30; font-size: 14px;">v7.2.5</span></h1>
+        <button class="theme-btn" onclick="alternarTema()">🌓</button>
+    </div>
+
+    <!-- Abas -->
+    <div class="tabs">
+        <button class="tab active" onclick="ativarAba('estoque')">
+            <span class="tab-icon">📦</span>
+            <span class="tab-label">Estoque</span>
+        </button>
+        <button class="tab" onclick="ativarAba('lista')">
+            <span class="tab-icon">📋</span>
+            <span class="tab-label">Lista</span>
+        </button>
+        <button class="tab" onclick="ativarAba('adicionar')">
+            <span class="tab-icon">➕</span>
+            <span class="tab-label">Adicionar</span>
+        </button>
+    </div>
+
+    <!-- Seção Estoque -->
+    <div id="estoque-section" class="section active">
+        <button id="btn-toggle-lista" class="btn-toggle" style="width:100%; padding:14px; margin-bottom:16px; background:white; border:1px solid #E5E5EA; border-radius:12px;" onclick="alternarVisibilidadeTabela()">🔽 Ocultar Lista de Estoque</button>
+
+        <div id="tabela-wrapper" class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-check"><input type="checkbox" id="check-todos" onchange="alternarTodos(this)"></th>
+                        <th class="col-desc">Descrição</th>
+                        <th class="col-qtd">Qtd</th>
+                        <th class="col-unid">Unid</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-itens-container"></tbody>
+            </table>
+        </div>
+
+        <div class="share-group">
+            <button class="btn-zap" onclick="compartilharEstoque()">Enviar Estoque</button>
+            <button class="btn-zap" onclick="copiarEstoque()">Copiar Estoque</button>
+        </div>
+
+        <div class="actions-section">
+            <button class="btn-primary" onclick="iniciarNovoDia()">☀ INICIAR NOVO DIA (ZERAR QTD)</button>
+            <button class="btn-secondary" onclick="salvarListaNoCelular()">💾 SALVAR LISTA NO CELULAR</button>
+            <button class="btn-secondary" onclick="document.getElementById('input-arquivo').click()">📂 CARREGAR LISTA DO CELULAR</button>
+            <button class="btn-danger" onclick="resetarTudo()">⚠ RESTAURAR LISTA PADRÃO</button>
+        </div>
+        <input type="file" id="input-arquivo" accept=".json" style="display: none;" onchange="carregarListaDoCelular(event)">
+    </div>
+
+    <!-- Seção Lista de Compras -->
+    <div id="lista-section" class="section">
+        <div id="area-compras">
+            <h2 id="titulo-compras">LISTA DE COMPRAS</h2>
+            <ul id="lista-compras-visual"></ul>
+            <div class="share-group">
+                <button class="btn-compra" onclick="compartilharComprasZap()">WhatsApp Compras</button>
+                <button class="btn-compra" onclick="copiarCompras()">Copiar Compras</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-calc" class="modal-overlay" style="display:none;">
-        <div class="calc-box">
-            <div class="calc-header">
-                <span id="calc-title">🧮 Calculadora</span>
-                <button onclick="fecharCalculadora()" class="calc-close">✖</button>
+    <!-- Seção Adicionar -->
+    <div id="adicionar-section" class="section">
+        <div class="card">
+            <label>Produto</label>
+            <input type="text" id="novoProduto" placeholder="Item">
+            
+            <label>Qtd</label>
+            <input type="text" id="novoQtd" placeholder="Qtd" readonly onclick="abrirCalculadora(this)">
+            
+            <label>Unid</label>
+            <select id="novoUnidade">
+                <option value="kg">kg</option><option value="g">g</option><option value="uni">uni</option>
+                <option value="pct">pct</option><option value="cx">cx</option><option value="bld">bld</option><option value="crt">crt</option>
+            </select>
+            
+            <div class="action-group">
+                <button class="btn-half btn-primary" onclick="adicionarManual(false)">Adicionar</button>
+                <button class="btn-half btn-star" onclick="adicionarManual(true)">⭐ Fixar</button>
+                <button class="btn-half btn-danger" onclick="removerDoPadrao()">🗑️ Apagar</button>
             </div>
-            <div id="calc-display">0</div>
-            <div class="calc-grid">
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('C')">C</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('÷')">÷</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('×')">×</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('BACK')">⌫</button>
+            <div id="status-save" style="text-align:right; font-size:12px; color:#6C6C70; margin-top:8px; opacity:0;">Salvo.</div>
+        </div>
+    </div>
+
+    <!-- Botões flutuantes -->
+    <div class="nav-float">
+        <button class="btn-nav" onclick="window.scrollTo(0,0)">▲</button>
+        <button class="btn-nav" onclick="window.scrollTo(0, document.body.scrollHeight)">▼</button>
+    </div>
+
+    <!-- Calculadora modal simples -->
+    <div id="modal-calc" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(10px); justify-content:center; align-items:center; z-index:10000;">
+        <div style="background:white; border-radius:28px; padding:24px; width:90%; max-width:360px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <span id="calc-title" style="font-weight:600;">🧮 Calculadora</span>
+                <button onclick="fecharCalculadora()" style="background:none; border:none; font-size:24px;">✖</button>
+            </div>
+            <div id="calc-display" style="background:#F2F2F7; padding:20px; border-radius:16px; font-size:40px; text-align:right; margin-bottom:20px; font-family:monospace;">0</div>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">
+                <button class="calc-btn" onclick="calcDigito('C')">C</button>
+                <button class="calc-btn" onclick="calcDigito('÷')">/</button>
+                <button class="calc-btn" onclick="calcDigito('×')">×</button>
+                <button class="calc-btn" onclick="calcDigito('BACK')">⌫</button>
                 <button class="calc-btn" onclick="calcDigito('7')">7</button>
                 <button class="calc-btn" onclick="calcDigito('8')">8</button>
                 <button class="calc-btn" onclick="calcDigito('9')">9</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('-')">-</button>
+                <button class="calc-btn" onclick="calcDigito('-')">-</button>
                 <button class="calc-btn" onclick="calcDigito('4')">4</button>
                 <button class="calc-btn" onclick="calcDigito('5')">5</button>
                 <button class="calc-btn" onclick="calcDigito('6')">6</button>
-                <button class="calc-btn calc-bg-op" onclick="calcDigito('+')">+</button>
+                <button class="calc-btn" onclick="calcDigito('+')">+</button>
                 <button class="calc-btn" onclick="calcDigito('1')">1</button>
                 <button class="calc-btn" onclick="calcDigito('2')">2</button>
                 <button class="calc-btn" onclick="calcDigito('3')">3</button>
-                <button class="calc-btn calc-bg-confirm" style="grid-row: span 2;" onclick="calcSalvar()">OK</button>
-                <button class="calc-btn" onclick="calcDigito('0')" style="grid-column: span 2;">0</button>
+                <button class="calc-btn" onclick="calcDigito('OK')" style="grid-row:span 2; background:#32D74B; color:white;">OK</button>
+                <button class="calc-btn" onclick="calcDigito('0')" style="grid-column:span 2;">0</button>
                 <button class="calc-btn" onclick="calcDigito(',')">,</button>
             </div>
+            <button class="btn-half" onclick="ativarModoTeclado()" style="margin-top:10px; width:100%; background:#007AFF; color:white;">⌨️ Usar teclado</button>
         </div>
     </div>
 
-    <div id="assistive-touch">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-    </div>
-
-    <div id="search-overlay">
-        <div class="search-inner">
-            <div style="position: relative; flex: 1;">
-                <input type="text" id="filtroBusca" placeholder="🔍 Buscar..." oninput="filtrarGeral()" style="padding-right: 55px;">
-                <button class="btn-mic" onclick="toggleMic('busca', event)" id="btn-mic-busca">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-                <span class="btn-limpar" onclick="limparCampo('filtroBusca')">✖</span>
-            </div>
-            <select id="filtroSelect" style="max-width: 100px;" onchange="filtrarGeral()">
-                <option value="">📂 ITENS</option>
-            </select>
-        </div>
-    </div>
-
-    <div class="header-container">
-        <h1 id="titulo-pagina">
-            <span class="titulo-estoque" style="font-weight: 400; letter-spacing: 1px; color: #cccccc;">ESTOQUE</span> 
-            <span style="color: var(--btn-danger); font-weight: 900; margin-left: 4px;">V5.1</span>
-        </h1>
-        <button class="btn-theme" onclick="alternarTema()">🌓</button>
-    </div>
-
-    <div class="card">
-        <div class="input-group">
-            <div style="position: relative;">
-                <label>Produto</label>
-                <input type="text" id="novoProduto" placeholder="Item" oninput="autoPreencherUnidade()" style="padding-right: 55px;">
-                <button class="btn-mic" onclick="toggleMic('produto', event)" id="btn-mic-prod">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                        <line x1="12" y1="19" x2="12" y2="23"></line>
-                        <line x1="8" y1="23" x2="16" y2="23"></line>
-                    </svg>
-                </button>
-                <span class="btn-limpar" onclick="limparCampo('novoProduto')">✖</span>
-            </div>
-            <div style="position: relative;">
-                <label>Qtd</label>
-                <input type="text" id="novoQtd" placeholder="Qtd" onclick="abrirCalculadora(this)" readonly style="padding-right: 25px; cursor: pointer;">
-                <span class="btn-limpar" onclick="limparCampo('novoQtd')">✖</span>
-            </div>
-            <div>
-                <label>Unid</label>
-                <select id="novoUnidade">
-                    <option value="kg">kg</option><option value="g">g</option><option value="uni">uni</option>
-                    <option value="pct">pct</option><option value="cx">cx</option><option value="bld">bld</option><option value="crt">crt</option>
-                </select>
-            </div>
-            
-            <div class="action-group">
-                <button id="add-btn" class="btn-half" onclick="adicionarManual(false)">Adicionar</button>
-                <button id="add-star-btn" class="btn-half" onclick="adicionarManual(true)">⭐ Fixar</button>
-                <button id="remove-star-btn" class="btn-half" onclick="removerDoPadrao()">🗑️ Padrão</button>
+    <!-- Modal de confirmação simples -->
+    <div id="modal-confirm" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(10px); justify-content:center; align-items:center; z-index:10000;">
+        <div style="background:white; border-radius:28px; padding:30px; width:90%; max-width:360px; text-align:center;">
+            <div id="modal-text" style="font-size:17px; margin-bottom:35px;">Mensagem</div>
+            <div style="display:flex; gap:12px;">
+                <button id="modal-btn-cancel" onclick="fecharModal()" style="flex:1; padding:16px; background:transparent; border:1px solid #E5E5EA;">Cancelar</button>
+                <button id="modal-btn-confirm" onclick="confirmarAcao()" style="flex:1; padding:16px; background:#FF3B30; color:white; border:none;">Confirmar</button>
             </div>
         </div>
-        <div id="status-save">Salvo.</div>
     </div>
 
-    <button id="btn-toggle-lista" onclick="alternarLista()">🔽 Ocultar Lista de Estoque</button>
+    <script>
+        // ---------- Dados e Estado ----------
+        let produtosPadrao = [
+            "4 queijos|kg", "Açúcar|kg", "Alho frito|pct", "Azeitona|uni", "Bacon|kg", 
+            "Banana|kg", "Batata palha|pct", "Caixa|uni", "Calabresa|kg", "Canela|pct", 
+            "Carne|kg", "Cebola|kg", "Cheddar|uni", "Chocolate branco|kg", "Chocolate preto|kg", 
+            "Colorau|pct", "Detergente|uni", "Esponja|uni", "Fermento|uni", "Frango cozido|kg", 
+            "Frango cru|kg", "Fubá|kg", "Gelo|pct", "Milho|uni", "Molho|uni", "Mussarela|kg", 
+            "Óleo|uni", "Orégano|pct", "Ovo|uni", "Palha de aço|uni", "Papel toalhas|uni", 
+            "Plástico filme|uni", "Presunto|kg", "Requeijão|uni", "Saco p lixo|uni", 
+            "Saco plástico|uni", "Sal|kg", "Strogonoff|kg", "Tempero caldo de carne|cx", 
+            "Tempero caldo de frango|cx", "Tempero em pó carne|cx", "Tempero em pó frango|cx", "Trigo|kg"
+        ];
+        let STORAGE_KEYS = {
+            dados: "estoqueDados_v4_categorias",
+            ocultos: "itensOcultosPadrao_v4",
+            meus: "meusItensPadrao_v4",
+            tema: "temaEstoque"
+        };
+        let acaoConfirmacao = null;
+        let inputCalculadoraAtual = null;
+        let expressaoCalc = "";
 
-    <div class="table-wrapper">
-        <div id="swipe-bg">Apagar</div>
-        <table id="tabela-estoque">
-            <thead>
-                <tr>
-                    <th class="col-check"><input type="checkbox" id="check-todos" onchange="alternarTodos(this)"></th>
-                    <th class="col-desc">Descrição</th>
-                    <th class="col-qtd">Qtd</th>
-                    <th class="col-unid">Unid</th>
-                </tr>
-            </thead>
-            <tbody id="lista-itens-container"></tbody>
-        </table>
-    </div>
+        // ---------- Navegação por abas ----------
+        function ativarAba(nome) {
+            // Atualiza classes das abas
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.closest('.tab').classList.add('active');
+            // Mostra a seção correspondente
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(nome + '-section').classList.add('active');
+            darFeedback();
+        }
 
-    <div class="share-group" style="margin-bottom: 20px;">
-        <button class="btn-zap" onclick="darFeedback(); compartilharEstoque()">Enviar Estoque</button>
-        <button id="btn-copiar" class="btn-zap" onclick="copiarEstoque()">Copiar Estoque</button>
-    </div>
+        // ---------- Funções auxiliares ----------
+        function darFeedback() {
+            if (navigator.vibrate) navigator.vibrate(15);
+        }
 
-    <div id="area-compras">
-        <h2 id="titulo-compras">LISTA DE COMPRAS</h2>
-        <ul id="lista-compras-visual"></ul>
-        <div class="share-group">
-            <button class="btn-compra" onclick="darFeedback(); compartilharComprasZap()">WhatsApp Compras</button>
-            <button class="btn-compra" onclick="copiarCompras()">Copiar Compras</button>
-        </div>
-    </div>
+        function obterDataAmanha() {
+            let amanha = new Date();
+            amanha.setDate(amanha.getDate() + 1);
+            return amanha.toLocaleDateString('pt-BR');
+        }
 
-    <button id="btn-novo-dia" onclick="iniciarNovoDia()">☀ INICIAR NOVO DIA (ZERAR QTD)</button>
-    <button id="btn-exportar" onclick="salvarListaNoCelular()">💾 SALVAR LISTA NO CELULAR</button>
-    <button id="btn-importar" onclick="darFeedback(); document.getElementById('input-arquivo').click()">📂 CARREGAR LISTA DO CELULAR</button>
-    <button id="btn-reset" onclick="resetarTudo()">⚠ RESTAURAR LISTA PADRÃO</button>
-    <input type="file" id="input-arquivo" accept=".json" style="display: none;" onchange="carregarListaDoCelular(event)">
+        function atualizarTituloCompras() {
+            document.getElementById('titulo-compras').innerText = "LISTA " + obterDataAmanha();
+        }
 
-    <div class="nav-float">
-        <button class="btn-nav" onclick="darFeedback(); window.scrollTo(0,0)">▲</button>
-        <button class="btn-nav" onclick="darFeedback(); window.scrollTo(0, document.body.scrollHeight)">▼</button>
-    </div>
+        function mostrarToast(msg) {
+            let container = document.getElementById('toast-container');
+            let toast = document.createElement('div');
+            toast.style.background = 'white';
+            toast.style.color = '#1C1C1E';
+            toast.style.padding = '16px 24px';
+            toast.style.borderRadius = '30px';
+            toast.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+            toast.style.marginBottom = '10px';
+            toast.style.textAlign = 'center';
+            toast.innerText = msg;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
-    <script src="produtos.js"></script>
-    <script src="script.js"></script>
+        // ---------- Persistência ----------
+        function salvarDados(dados) {
+            localStorage.setItem(STORAGE_KEYS.dados, JSON.stringify(dados));
+        }
+
+        function carregarDados() {
+            let salvos = localStorage.getItem(STORAGE_KEYS.dados);
+            return salvos ? JSON.parse(salvos) : null;
+        }
+
+        function salvarOcultos(ocultos) {
+            localStorage.setItem(STORAGE_KEYS.ocultos, JSON.stringify(ocultos));
+        }
+
+        function carregarOcultos() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.ocultos) || "[]");
+        }
+
+        function salvarMeus(meus) {
+            localStorage.setItem(STORAGE_KEYS.meus, JSON.stringify(meus));
+        }
+
+        function carregarMeus() {
+            return JSON.parse(localStorage.getItem(STORAGE_KEYS.meus) || "[]");
+        }
+
+        function salvarTema(modo) {
+            localStorage.setItem(STORAGE_KEYS.tema, modo);
+        }
+
+        function carregarTema() {
+            return localStorage.getItem(STORAGE_KEYS.tema);
+        }
+
+        // ---------- Renderização da tabela ----------
+        let containerItens = document.getElementById("lista-itens-container");
+
+        function renderizarListaCompleta(dados) {
+            containerItens.innerHTML = "";
+            dados.sort((a, b) => a.n.localeCompare(b.n));
+            let grupos = {
+                'carnes': [], 'laticinios': [], 'hortifruti': [], 'mercearia': [],
+                'temperos': [], 'limpeza': [], 'bebidas': [], 'embalagens': [], 'outros': []
+            };
+            dados.forEach(item => {
+                let cat = identificarCategoria(item.n);
+                grupos[cat].push(item);
+            });
+            for (let cat in grupos) {
+                if (grupos[cat].length > 0) {
+                    let trHeader = document.createElement("tr");
+                    trHeader.classList.add("categoria-header-row");
+                    trHeader.innerHTML = `<td colspan="4" class="categoria-header" style="background-color: #E5E5EA; font-weight:bold;">${nomesCategorias[cat]}</td>`;
+                    containerItens.appendChild(trHeader);
+                    grupos[cat].forEach(item => {
+                        inserirLinhaNoDOM(item.n, item.q, item.u, item.c, item.min, item.max);
+                    });
+                }
+            }
+            atualizarPainelCompras();
+        }
+
+        function inserirLinhaNoDOM(n, q, u, chk, min, max) {
+            let tr = document.createElement("tr");
+            if (chk) tr.classList.add("linha-marcada");
+            tr.dataset.min = min !== null ? min : '';
+            tr.dataset.max = max !== null ? max : '';
+            tr.innerHTML = `
+                <td class="col-check"><input type="checkbox" ${chk ? 'checked' : ''} onchange="alternarCheck(this)"></td>
+                <td class="col-desc">
+                    <span contenteditable="true" class="nome-prod" onblur="salvarEAtualizar()">${n}</span>
+                </td>
+                <td class="col-qtd"><input type="text" class="input-qtd-tabela" value="${q}" readonly onclick="abrirCalculadora(this)"></td>
+                <td class="col-unid"><select class="select-tabela" onchange="salvarDados()">
+                    <option value="kg" ${u==='kg'?'selected':''}>kg</option>
+                    <option value="g" ${u==='g'?'selected':''}>g</option>
+                    <option value="uni" ${u==='uni'?'selected':''}>uni</option>
+                    <option value="pct" ${u==='pct'?'selected':''}>pct</option>
+                    <option value="cx" ${u==='cx'?'selected':''}>cx</option>
+                    <option value="bld" ${u==='bld'?'selected':''}>bld</option>
+                    <option value="crt" ${u==='crt'?'selected':''}>crt</option>
+                </select></td>
+            `;
+            containerItens.appendChild(tr);
+        }
+
+        function coletarDadosDaTabela() {
+            let dados = [];
+            document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
+                let c = r.querySelectorAll("td");
+                if (c.length > 0) {
+                    let nome = c[1]?.querySelector('.nome-prod')?.innerText.replace(/(\r\n|\n|\r)/gm, " ").trim() || '';
+                    let qtd = c[2]?.querySelector("input")?.value.trim() || '';
+                    let unid = c[3]?.querySelector("select")?.value || '';
+                    let chk = c[0]?.querySelector("input[type='checkbox']")?.checked || false;
+                    let min = r.dataset.min ? parseFloat(r.dataset.min) : null;
+                    let max = r.dataset.max ? parseFloat(r.dataset.max) : null;
+                    dados.push({ n: nome, q: qtd, u: unid, c: chk, min: min, max: max });
+                }
+            });
+            return dados;
+        }
+
+        function salvarEAtualizar() {
+            let dados = coletarDadosDaTabela();
+            salvarDados(dados);
+            renderizarListaCompleta(dados);
+        }
+
+        // ---------- Categorias ----------
+        function identificarCategoria(nome) {
+            let n = nome.toLowerCase();
+            if (n.includes('carne') || n.includes('frango') || n.includes('bacon')) return 'carnes';
+            if (n.includes('queijo') || n.includes('leite') || n.includes('requeijão')) return 'laticinios';
+            if (n.includes('tomate') || n.includes('cebola') || n.includes('banana')) return 'hortifruti';
+            if (n.includes('arroz') || n.includes('feijão') || n.includes('açúcar')) return 'mercearia';
+            if (n.includes('orégano') || n.includes('pimenta') || n.includes('sal')) return 'temperos';
+            if (n.includes('detergente') || n.includes('sabão') || n.includes('papel')) return 'limpeza';
+            if (n.includes('refrigerante') || n.includes('suco') || n.includes('água')) return 'bebidas';
+            if (n.includes('caixa') || n.includes('sacola') || n.includes('plástico')) return 'embalagens';
+            return 'outros';
+        }
+
+        const nomesCategorias = {
+            'carnes': '🥩 CARNES & FRIOS',
+            'laticinios': '🧀 LATICÍNIOS',
+            'hortifruti': '🥦 HORTIFRUTI',
+            'mercearia': '🍝 MERCEARIA & GRÃOS',
+            'temperos': '🧂 TEMPEROS',
+            'limpeza': '🧽 LIMPEZA & DESCARTÁVEIS',
+            'bebidas': '🥤 BEBIDAS',
+            'embalagens': '📦 EMBALAGENS',
+            'outros': '📦 OUTROS'
+        };
+
+        // ---------- Checkboxes ----------
+        function alternarCheck(box) {
+            let linha = box.closest('tr');
+            if (box.checked) {
+                linha.classList.add("linha-marcada");
+            } else {
+                linha.classList.remove("linha-marcada");
+                document.getElementById('check-todos').checked = false;
+            }
+            salvarDados(coletarDadosDaTabela());
+            atualizarPainelCompras();
+        }
+
+        function alternarTodos(master) {
+            let isChecked = master.checked;
+            document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
+                let box = r.querySelector("input[type='checkbox']");
+                if (box) {
+                    box.checked = isChecked;
+                    if (isChecked) r.classList.add("linha-marcada");
+                    else r.classList.remove("linha-marcada");
+                }
+            });
+            salvarDados(coletarDadosDaTabela());
+            atualizarPainelCompras();
+        }
+
+        // ---------- Lista de compras ----------
+        function atualizarPainelCompras() {
+            let ul = document.getElementById("lista-compras-visual");
+            let area = document.getElementById("area-compras");
+            if (!ul || !area) return;
+            ul.innerHTML = "";
+            let temItens = false;
+            document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
+                let box = r.querySelector("input[type='checkbox']");
+                if (box && box.checked) {
+                    temItens = true;
+                    let li = document.createElement("li");
+                    li.innerText = r.querySelector(".nome-prod").innerText.trim();
+                    ul.appendChild(li);
+                }
+            });
+            area.style.display = temItens ? "block" : "none";
+        }
+
+        // ---------- Adicionar manual ----------
+        function adicionarManual(fixar) {
+            let p = document.getElementById("novoProduto").value.trim();
+            let q = document.getElementById("novoQtd").value.trim();
+            let u = document.getElementById("novoUnidade").value;
+            if (!p) { mostrarToast("⚠️ Digite o nome do produto!"); return; }
+            let dados = carregarDados() || [];
+            if (dados.some(item => item.n.toLowerCase() === p.toLowerCase())) {
+                mostrarToast("⚠️ O item já existe na lista!");
+                return;
+            }
+            dados.push({ n: p, q: q, u: u, c: false, min: null, max: null });
+            renderizarListaCompleta(dados);
+            salvarDados(dados);
+            if (fixar) {
+                let favoritos = carregarMeus();
+                if (!favoritos.some(i => i.n.toLowerCase() === p.toLowerCase())) {
+                    favoritos.push({ n: p, u: u });
+                    salvarMeus(favoritos);
+                    mostrarToast("Item FIXADO! ⭐");
+                }
+            }
+            document.getElementById("novoProduto").value = "";
+            document.getElementById("novoQtd").value = "";
+        }
+
+        function removerDoPadrao() {
+            let p = document.getElementById("novoProduto").value.trim();
+            if (!p) { mostrarToast("⚠️ Digite o nome para remover!"); return; }
+            let favoritos = carregarMeus().filter(i => i.n.toLowerCase() !== p.toLowerCase());
+            salvarMeus(favoritos);
+            let ocultos = carregarOcultos();
+            if (!ocultos.includes(p.toLowerCase())) {
+                ocultos.push(p.toLowerCase());
+                salvarOcultos(ocultos);
+            }
+            // Remove da tabela
+            document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
+                if (r.querySelector(".nome-prod").innerText.toLowerCase() === p.toLowerCase()) r.remove();
+            });
+            salvarDados(coletarDadosDaTabela());
+            atualizarPainelCompras();
+            document.getElementById("novoProduto").value = "";
+            document.getElementById("novoQtd").value = "";
+        }
+
+        function carregarListaPadrao() {
+            let lista = [];
+            let ocultos = carregarOcultos();
+            produtosPadrao.forEach(p => {
+                let [nome, unid] = p.split("|");
+                if (!ocultos.includes(nome.toLowerCase())) {
+                    lista.push({ n: nome, q: "", u: unid, c: false, min: null, max: null });
+                }
+            });
+            let favoritos = carregarMeus();
+            favoritos.forEach(f => {
+                if (!lista.some(i => i.n.toLowerCase() === f.n.toLowerCase())) {
+                    lista.push({ n: f.n, q: "", u: f.u, c: false, min: null, max: null });
+                }
+            });
+            renderizarListaCompleta(lista);
+        }
+
+        // ---------- Calculadora ----------
+        function abrirCalculadora(input) {
+            inputCalculadoraAtual = input;
+            document.getElementById('modal-calc').style.display = 'flex';
+            expressaoCalc = input.value.replace(',', '.').trim() || "";
+            document.getElementById('calc-display').innerText = expressaoCalc.replace(/\./g, ',') || "0";
+        }
+        function fecharCalculadora() {
+            document.getElementById('modal-calc').style.display = 'none';
+            inputCalculadoraAtual = null;
+        }
+        function calcDigito(dig) {
+            if (dig === 'C') expressaoCalc = "";
+            else if (dig === 'BACK') expressaoCalc = expressaoCalc.slice(0, -1);
+            else if (dig === 'OK') calcSalvar();
+            else {
+                if (dig === ',') dig = '.';
+                expressaoCalc += dig;
+            }
+            document.getElementById('calc-display').innerText = expressaoCalc.replace(/\./g, ',') || "0";
+        }
+        function calcSalvar() {
+            try {
+                let expr = expressaoCalc.replace(/×/g, '*').replace(/÷/g, '/');
+                expr = expr.replace(/[^0-9+\-*/.]/g, '');
+                if (expr && inputCalculadoraAtual) {
+                    let resultado = eval(expr);
+                    if (!isFinite(resultado)) throw new Error();
+                    resultado = Math.round(resultado * 100) / 100;
+                    inputCalculadoraAtual.value = resultado.toString().replace('.', ',');
+                } else if (inputCalculadoraAtual) {
+                    inputCalculadoraAtual.value = "";
+                }
+                salvarDados(coletarDadosDaTabela());
+                fecharCalculadora();
+                mostrarToast("Quantidade Salva ✅");
+            } catch (e) {
+                document.getElementById('calc-display').innerText = "Erro";
+                setTimeout(() => document.getElementById('calc-display').innerText = expressaoCalc.replace(/\./g, ',') || "0", 1000);
+            }
+        }
+        function ativarModoTeclado() {
+            fecharCalculadora();
+            if (inputCalculadoraAtual) {
+                inputCalculadoraAtual.removeAttribute('readonly');
+                inputCalculadoraAtual.focus();
+            }
+        }
+
+        // ---------- Modal confirmação ----------
+        function mostrarConfirmacao(msg, callback, tipo = 'perigo') {
+            document.getElementById('modal-text').innerText = msg;
+            document.getElementById('modal-btn-confirm').style.backgroundColor = tipo === 'sucesso' ? '#32D74B' : '#FF3B30';
+            document.getElementById('modal-confirm').style.display = 'flex';
+            acaoConfirmacao = callback;
+        }
+        function fecharModal() {
+            document.getElementById('modal-confirm').style.display = 'none';
+            acaoConfirmacao = null;
+        }
+        function confirmarAcao() {
+            if (acaoConfirmacao) acaoConfirmacao();
+            fecharModal();
+        }
+
+        // ---------- Ações principais ----------
+        function alternarTema() {
+            document.body.classList.toggle('dark-mode');
+            // simplificado, apenas para teste
+        }
+
+        function alternarVisibilidadeTabela() {
+            let wrapper = document.getElementById('tabela-wrapper');
+            let btn = document.getElementById('btn-toggle-lista');
+            if (wrapper.style.display === 'none') {
+                wrapper.style.display = 'block';
+                btn.innerText = '🔽 Ocultar Lista de Estoque';
+            } else {
+                wrapper.style.display = 'none';
+                btn.innerText = '▶️ Mostrar Lista de Estoque';
+            }
+        }
+
+        function resetarTudo() {
+            mostrarConfirmacao("ATENÇÃO: Restaurar lista de fábrica?", () => {
+                localStorage.removeItem(STORAGE_KEYS.dados);
+                localStorage.removeItem(STORAGE_KEYS.ocultos);
+                location.reload();
+            });
+        }
+
+        function iniciarNovoDia() {
+            mostrarConfirmacao("ZERAR QUANTIDADES?", () => {
+                let dados = carregarDados() || [];
+                dados.forEach(item => { item.q = ""; item.c = false; });
+                salvarDados(dados);
+                location.reload();
+            }, 'sucesso');
+        }
+
+        function salvarListaNoCelular() {
+            let dados = localStorage.getItem(STORAGE_KEYS.dados);
+            if (!dados) return;
+            let blob = new Blob([dados], { type: "application/json" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = "estoque.json";
+            a.click();
+        }
+
+        function carregarListaDoCelular(event) {
+            let file = event.target.files[0];
+            let reader = new FileReader();
+            reader.onload = (e) => {
+                let dados = JSON.parse(e.target.result);
+                localStorage.setItem(STORAGE_KEYS.dados, JSON.stringify(dados));
+                location.reload();
+            };
+            reader.readAsText(file);
+        }
+
+        function compartilharEstoque() {
+            let texto = gerarTextoEstoque();
+            window.open("https://wa.me/?text=" + encodeURIComponent(texto));
+        }
+        function copiarEstoque() {
+            let texto = gerarTextoEstoque();
+            navigator.clipboard?.writeText(texto).then(() => mostrarToast("Copiado!"));
+        }
+        function compartilharComprasZap() {
+            let texto = gerarTextoCompras();
+            window.open("https://wa.me/?text=" + encodeURIComponent(texto));
+        }
+        function copiarCompras() {
+            let texto = gerarTextoCompras();
+            navigator.clipboard?.writeText(texto).then(() => mostrarToast("Copiado!"));
+        }
+        function gerarTextoEstoque() {
+            let t = "*ESTOQUE " + new Date().toLocaleDateString() + "*\n\n";
+            let itens = [];
+            document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
+                let nome = r.querySelector(".nome-prod").innerText.trim();
+                let qtd = r.querySelector(".input-qtd-tabela").value.trim();
+                let unid = r.querySelector(".select-tabela").value;
+                itens.push(qtd ? `${nome}: ${qtd} ${unid}` : `${nome}:   ${unid}`);
+            });
+            return t + itens.sort().join('\n');
+        }
+        function gerarTextoCompras() {
+            let t = "*LISTA DE COMPRAS " + obterDataAmanha() + "*\n\n";
+            let itens = [];
+            document.querySelectorAll("#lista-itens-container tr:not(.categoria-header-row)").forEach(r => {
+                if (r.querySelector("input[type='checkbox']").checked) {
+                    itens.push(r.querySelector(".nome-prod").innerText.trim());
+                }
+            });
+            return t + itens.sort().join('\n');
+        }
+
+        // ---------- Inicialização ----------
+        function iniciar() {
+            if (carregarTema() === 'escuro') document.body.classList.add('dark-mode');
+            atualizarTituloCompras();
+            let salvos = carregarDados();
+            if (salvos && salvos.length) renderizarListaCompleta(salvos);
+            else carregarListaPadrao();
+        }
+
+        iniciar();
+    </script>
 </body>
 </html>
